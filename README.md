@@ -6,11 +6,12 @@ Claude skills for my rules-based trading workflow. Analysis, not advice.
 
 | Skill | What it does |
 |---|---|
+| [`stock-checkup`](skills/stock-checkup/SKILL.md) | Answers "what happened to X / should I buy X": finds what moved it, checks whether the business or just the price changed (vs SPY and the sector ETF), checks combined exposure, and sizes a small starter under the account rules. Hands off to `liquidity-sweep-model` for entry timing. |
 | [`liquidity-sweep-model`](skills/liquidity-sweep-model/SKILL.md) | Grades a stock or ETF setup with my liquidity sweep model (sweep → FVG → market structure shift) using live Robinhood data, with 1% risk sizing, kill switches, news/earnings filters and pattern-day-trader checks. Never places orders. |
 
 ## Install
 
-- **Claude (claude.ai / desktop):** zip the `skills/liquidity-sweep-model` folder and upload it under Settings → Capabilities → Skills.
+- **Claude (claude.ai / desktop):** zip a skill folder (e.g. `skills/stock-checkup`) and upload it under Settings → Capabilities → Skills.
 - **Claude Code:** copy the folder into `~/.claude/skills/` (personal) or `.claude/skills/` in a project.
 
 ## Requirements
