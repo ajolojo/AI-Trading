@@ -8,6 +8,7 @@ Claude skills for a small, rules-based trading workflow: check why a stock moved
 > - **Not financial advice.** These skills produce analysis only. You make every decision and you are responsible for every trade.
 > - **Untested.** The liquidity sweep model is in its **paper-trading phase**. It has not been backtested or proven profitable, and it never places orders.
 > - **Use at your own risk.** Stocks, options and intraday trading can lose money fast.
+> - **Set your margins before first use**: your risk limits in `rules.md` and your broker's margin setting. See [Set your margins](#set-your-margins-do-this-first).
 > - **The order rule is an instruction to Claude, not a technical lock.** Also turn on your broker's own trade approval for connected apps if it offers one (see [Recommended broker setting](#recommended-broker-setting)).
 > - Not affiliated with Robinhood or Anthropic.
 
@@ -33,16 +34,47 @@ Claude skills for a small, rules-based trading workflow: check why a stock moved
 
 ---
 
+## Set your margins (do this first)
+
+Before you install, set two kinds of margins. The skills depend on both.
+
+### 1. Your safety margins (in `rules.md`)
+
+These limit how much you can put into any one trade and how much you can lose. Keep the defaults or make them stricter. They can't be loosened past the hard limits.
+
+| Margin | Default | Hard limit | File |
+|---|---|---|---|
+| Cash floor (cash left after any buy) | 20% of account value | — | `skills/stock-checkup/rules.md` |
+| Single-stock cap | 25% of account value | 25% | `skills/stock-checkup/rules.md` |
+| Index ETF share of invested money | At least 50% | — | `skills/stock-checkup/rules.md` |
+| Risk per trade | 1% of account value | 1% | `skills/liquidity-sweep-model/rules.md` |
+| Total open risk | 2% of account value | 2% | `skills/liquidity-sweep-model/rules.md` |
+| Daily / weekly / monthly loss stops | −2% / −4% / −8% | — | `skills/liquidity-sweep-model/rules.md` |
+| Minimum stop distance | 0.1% of price | 0.1% | `skills/liquidity-sweep-model/rules.md` |
+
+Pick numbers you could lose without it hurting. If you're unsure, start stricter (a higher cash floor, a lower risk per trade).
+
+### 2. Your broker's margin setting
+
+The skills never borrow money, but a **margin account** can let a buy larger than your cash go through on borrowed money.
+
+1. In your broker's app, check whether the account you'll use is a **cash** or **margin** account. In Robinhood this is under your account's settings for **margin investing** (names may vary by app version).
+2. If you don't intend to borrow, **turn margin investing off** or use a cash account.
+3. Write the account type (`cash` or `margin`) in `skills/liquidity-sweep-model/rules.md`.
+4. If you keep margin on, the size caps still use **settled cash**, not buying power, so a skill won't suggest a buy larger than your cash.
+
+---
+
 ## Install
 
 **Claude (claude.ai or desktop)**
 1. Download this repo (Code → Download ZIP) and unzip it.
-2. Edit `rules.md` in each skill folder (see [Set your rules](#set-your-rules)).
+2. [Set your margins](#set-your-margins-do-this-first), then edit the rest of `rules.md` in each skill folder (see [Set your rules](#set-your-rules)).
 3. Zip each skill folder on its own (for example `skills/stock-checkup`, containing `SKILL.md` and `rules.md`).
 4. Upload each zip as a skill in Claude's settings.
 
 **Claude Code**
-- Copy each folder in `skills/` into `~/.claude/skills/` (all projects) or `.claude/skills/` (one project), then edit the `rules.md` files.
+- Copy each folder in `skills/` into `~/.claude/skills/` (all projects) or `.claude/skills/` (one project), then [set your margins](#set-your-margins-do-this-first) and edit the `rules.md` files.
 
 ---
 
