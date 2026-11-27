@@ -101,4 +101,4 @@ Before using the sweep model with real money:
 
 ## License
 
-No license has been added yet, so all rights are reserved by default: you can read and fork this repo on GitHub, but reuse needs permission. To let friends copy and change it freely, add a `LICENSE` file (MIT is the usual simple choice: on GitHub, **Add file → Create new file → name it `LICENSE` → Choose a license template → MIT**).
+[MIT](LICENSE). You're free to use, copy, change and share these skills, as long as the license notice stays with them. The software is provided "as is", without warranty, and the authors aren't liable for any losses. That includes trading losses: see [Read this first](#️-read-this-first).
