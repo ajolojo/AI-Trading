@@ -1,57 +1,51 @@
 # My rules (edit this file)
 
-Personal settings for the `liquidity-sweep-model` skill. Edit the values on the right.
+Your personal settings for the `liquidity-sweep-model` skill. **Fill in the "Your setting" column with your own numbers.** The "Example" column shows the repo owner's settings for reference only. The skill never uses the example column.
 
-You can make these rules **stricter** at any time. You can't make them looser than the hard limits in `SKILL.md` (the "Safety core"). If you set something looser, the skill uses the hard limit and tells you.
+If a required setting is blank, Claude asks you for it before grading and suggests you save it here. It won't assume the example values.
 
-## Account and phase
+The structural safety rules in `SKILL.md` (the "Safety core": paper-trading only, exact account match, no borrowing, fail-closed) always apply and can't be turned off here.
 
-| Setting | Value | Notes |
-|---|---|---|
-| Account the plan is sized for | `` | Nickname of the account to size paper trades against. Leave blank to be asked. Must match exactly; the skill shows its last 4 digits. |
-| Phase | Paper trading | Hard limit in this version: the skill never reviews or places orders. |
+## Account
 
-## Risk and size
+| Setting | Your setting | Example | Notes |
+|---|---|---|---|
+| Account the plan is sized for | `` | `MyTradingAcct` | Must match the broker nickname exactly. |
+| Account type | `` | cash | `cash` or `margin`. |
+| Day-trade rule your broker applies | `` | Ask broker | FINRA replaced the "pattern day trader" rule and its $25,000 minimum with intraday margin standards effective June 4, 2026; brokers can phase it in until October 20, 2027. Write what your broker currently applies. |
+| Cash floor | `` | Same as `stock-checkup` (20%) | Cash that must remain; size is capped at settled cash minus this. |
 
-| Setting | Default | Hard limit |
-|---|---|---|
-| Risk per trade | 1% of account value | 1% max |
-| Max open trades while learning | 1 | — |
-| Max total open risk | 2% of account value | 2% max |
-| Size cap | Settled cash minus your cash floor, and 25% of account value per stock | Always applies |
-| Minimum stop distance | 0.1% of price | Tighter stops = "No trade" |
+## Your risk settings (required)
 
-## Kill switches
+| Setting | Your setting | Example | Notes |
+|---|---|---|---|
+| Risk per trade | `` | 1% of account value | The most you'll lose if the stop is hit. |
+| Max open trades | `` | 1 while learning | |
+| Total open risk | `` | 2% of account value | Across all open trades. |
+| Single-stock cap | `` | 25% of account value | Max position size per stock. |
+| Daily loss stop | `` | 2 losing trades or −2% | Stop trading for the day. |
+| Weekly loss stop | `` | −4% | |
+| Monthly loss stop | `` | −8%, then 2 weeks paper only | |
+| Losing-streak rule | `` | After 3 losses in a row, half size for 5 trades | |
 
-| Setting | Default |
-|---|---|
-| Daily stop | After 2 losing trades or −2% |
-| Weekly stop | −4% |
-| Monthly stop | −8%, then 2 weeks of paper trading only |
-| Losing streak | After 3 losses in a row, half size for the next 5 trades |
+Claude warns you (once per conversation) if a setting looks aggressive: risk per trade over 2%, total open risk over 6%, or no daily loss stop. It still uses your setting.
 
-The skill asks you for your recent results (from your journal) before grading, so it can check these.
+The skill asks for your recent results (from your journal) before grading, so it can check the loss stops.
 
 ## No new entries when
+
+These are part of the model. You can add more.
 
 - First 15 minutes after the open, or the last 30 minutes before the close.
 - 30 minutes before and after CPI, the jobs report, Fed decisions, or Fed chair speeches.
 - Within 2 trading days of the stock's earnings.
 - Half-days, VIX above 30, or after an opening gap above 3% until the first hour's range is set.
 
-## Account type notes
-
-| Setting | Value | Notes |
-|---|---|---|
-| Account type | `` | `cash` or `margin`. Leave blank to be asked. |
-| Day-trade limit | Ask my broker | FINRA replaced the "pattern day trader" rule and its $25,000 minimum with new intraday margin standards effective June 4, 2026, but brokers can phase the change in until October 20, 2027. Check which rule your broker applies and write it here. |
-| Cash accounts | Settled cash only | Using unsettled sale proceeds can cause good-faith or free-riding violations. |
-
 ## Validation targets
 
-| Setting | Default |
-|---|---|
-| Paper setups before going live | 50 |
-| Minimum expectancy to go live | +0.2R |
-| Rule-follow rate | At least 90% of trades |
-| First live phase | 30 trades at 0.5% risk, then 1% |
+| Setting | Your setting | Example |
+|---|---|---|
+| Paper setups before going live | `` | 50 |
+| Minimum expectancy to go live | `` | +0.2R |
+| Rule-follow rate | `` | At least 90% of trades |
+| First live phase | `` | 30 trades at half your risk per trade |
