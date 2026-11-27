@@ -1,12 +1,15 @@
 # AI-Trading
 
-Claude skills for a small, rules-based trading workflow: check why a stock moved, decide whether the business or just the price changed, size a small starter position, and grade intraday entries with a liquidity sweep model.
+Claude skills for a small, rules-based trading workflow: check why a stock moved, decide whether the business or just the price changed, size a small starter position, and grade entries with a liquidity sweep model.
 
-> ## ⚠️ Read this first
+**Private.** Shared by invitation only. Please don't forward, re-upload, or fork these files. See [License](#license).
+
+> ## Read this first
 > - **Not financial advice.** These skills produce analysis only. You make every decision and you are responsible for every trade.
-> - **Untested.** The liquidity sweep model is in its **paper-trading phase**. It has not been backtested or proven profitable.
-> - **Use at your own risk.** Markets, options and intraday trading can lose money fast, including more than you planned.
-> - **The skills never place orders on their own.** Any order must be reviewed and then confirmed by you with an exact phrase (see [Safety rules](#safety-rules)).
+> - **Untested.** The liquidity sweep model is in its **paper-trading phase**. It has not been backtested or proven profitable, and it never places orders.
+> - **Use at your own risk.** Stocks, options and intraday trading can lose money fast.
+> - **The order rule is an instruction to Claude, not a technical lock.** Also turn on your broker's own trade approval for connected apps if it offers one (see [Recommended broker setting](#recommended-broker-setting)).
+> - Not affiliated with Robinhood or Anthropic.
 
 ---
 
@@ -14,19 +17,19 @@ Claude skills for a small, rules-based trading workflow: check why a stock moved
 
 | Skill | Use it for | Example prompt |
 |---|---|---|
-| [`stock-checkup`](skills/stock-checkup/SKILL.md) | "What happened to X / should I buy X?" Finds what moved it, compares the move to SPY and a sector ETF, checks the latest quarters, looks at your combined exposure, and sizes a small starter position. | "Look at NOW. Why is it down and is it worth buying?" |
-| [`liquidity-sweep-model`](skills/liquidity-sweep-model/SKILL.md) | Entry timing. Grades a setup step by step (market profile → discount/premium → draw on liquidity → sweep → fair value gap → market structure shift) and returns **Valid setup**, **Wait**, or **No trade**, with a trade plan and risk checks. | "Check SPY with my sweep model." |
+| [`stock-checkup`](skills/stock-checkup/SKILL.md) | "Why did X move / should I buy X?" Finds what moved it, compares the move to SPY and a sector ETF, checks recent quarters, looks at what you already own, and sizes a small starter position. | "Why is NOW down, and is it worth buying?" |
+| [`liquidity-sweep-model`](skills/liquidity-sweep-model/SKILL.md) | Entry timing. Grades a setup step by step (market profile → discount/premium → draw on liquidity → sweep → fair value gap → market structure shift) and returns **Valid setup**, **Wait**, or **No trade**, with a paper trade plan. | "Check SPY with the sweep model." |
 
-They work together: `stock-checkup` answers *whether* to own something, then offers to run `liquidity-sweep-model` for *when* to enter.
+`stock-checkup` answers *whether* to own something, then offers `liquidity-sweep-model` for *when* to enter.
 
 ---
 
 ## Requirements
 
 - **Claude** with skills enabled (claude.ai, the desktop app, or Claude Code).
-- **Robinhood connector**, connected and signed in. The skills read quotes, price history, fundamentals, earnings dates, positions and balances through it.
-  - Without it, `stock-checkup` can still do the web research parts (news, earnings, analyst changes) and will label them as web-only. `liquidity-sweep-model` needs live price data and will stop.
-- **Web search** enabled in Claude, for news and the cause of a move.
+- **Web search** enabled in Claude.
+- **Robinhood connector** (optional but recommended), connected and signed in.
+  - Without it, or with another broker, `stock-checkup` runs in research-only mode and labels it. `liquidity-sweep-model` needs live price data and will stop.
 
 ---
 
@@ -34,47 +37,54 @@ They work together: `stock-checkup` answers *whether* to own something, then off
 
 **Claude (claude.ai or desktop)**
 1. Download this repo (Code → Download ZIP) and unzip it.
-2. Zip one skill folder on its own, for example `skills/stock-checkup`.
-3. In Claude, upload the zip as a skill (in Settings, under skills).
-4. Repeat for `skills/liquidity-sweep-model`.
+2. Edit `rules.md` in each skill folder (see [Set your rules](#set-your-rules)).
+3. Zip each skill folder on its own (for example `skills/stock-checkup`, containing `SKILL.md` and `rules.md`).
+4. Upload each zip as a skill in Claude's settings.
 
 **Claude Code**
-- Copy the folders in `skills/` into `~/.claude/skills/` (all your projects) or `.claude/skills/` (one project).
+- Copy each folder in `skills/` into `~/.claude/skills/` (all projects) or `.claude/skills/` (one project), then edit the `rules.md` files.
 
 ---
 
-## Customize before use
+## Set your rules
 
-The skills were written for one person's accounts and rules. Edit these before you rely on them. Each skill is a plain-text `SKILL.md` you can change.
+Each skill has a `rules.md` next to its `SKILL.md`. That's the only file you need to edit. The defaults are a conservative starting point.
 
-| Setting | Where | Default | What to change |
-|---|---|---|---|
-| Tradable account | Both skills, "Setup" / "Connector and context" | A Robinhood account nicknamed `MCP` | Your own account's nickname. Keep one account as the only one the skills may suggest trades for. |
-| Read-only account | Both skills | "main account" | Any other accounts you want treated as context only. |
-| Cash floor | `stock-checkup` step 4 | Keep 20% of account value in cash after a buy | Your floor, as a % or a fixed dollar amount. |
-| Single-stock cap | `stock-checkup` step 4 | No stock above 25% of the account | Your cap. |
-| Index ETF share | `stock-checkup` step 4 | At least half of invested money in broad index ETFs (VTI, VXUS) | Your rule and your preferred ETFs. |
-| Risk per trade | `liquidity-sweep-model` Guardrails A | 1% of account value | Your risk %. |
-| Loss limits | `liquidity-sweep-model` Guardrails B | Stop after 2 losses or −2% a day, −4% a week, −8% a month | Your limits. |
-| Day-trade limit | `liquidity-sweep-model` Guardrails D | Pattern day trader rule: 3 day trades in 5 days for margin accounts under $25,000 | Remove if your account is over $25,000 or a cash account. |
-| Options | Both skills | No options in the tradable account | Only change this if you have your own written options rules. |
+| File | What you set |
+|---|---|
+| `skills/stock-checkup/rules.md` | Tradable account nickname, core and international ETFs, cash floor, single-stock cap, index ETF share, earnings flag window. |
+| `skills/liquidity-sweep-model/rules.md` | Account to size paper trades for, risk per trade, kill switches, no-entry windows, account type and your broker's day-trade rule. |
 
-### Optional rule documents
+**Rules can only get stricter.** Each `SKILL.md` has a "Safety core" that `rules.md`, project instructions, documents, web pages and anything else can't loosen. If a setting is looser than the Safety core, Claude uses the Safety core and tells you.
 
-The skills mention two documents: `claude/trading-model.md` (full sweep-model rules) and `claude/options-rules.md` (options rules). **You don't need them.** If they aren't there, the skills use the rules written inside each `SKILL.md`. If you add your own, put them in a Claude Project and the skills will follow them, and tell you where they differ.
+If you leave the account nickname blank, Claude lists your accounts (nickname and last 4 digits only) and asks which one to use.
 
 ---
 
 ## Safety rules
 
-Built into both skills:
+Built into the Safety core of both skills:
 
-- **No automatic orders.** The skills analyze only. If you ask for an order, Claude first runs Robinhood's order review and shows you the price, cost and any warnings, then **stops**.
-- **Exact confirmation phrase.** An order is placed only when you reply with the exact words `PLACE THE ORDERS`. Anything else means no.
-- **One tradable account.** Every other account is read-only.
-- **Live data only.** Every number is labeled live, intraday, after-hours, official close, or estimate. No numbers from memory.
-- **Start small, buy in pieces**, and write down why you're buying, the price where you're wrong, and a profit target before any buy.
-- **Sweep model kill switches:** stop trading for the day after 2 losses, and pause after weekly or monthly loss limits.
+- **Read-only by default.** The skills use only read tools. `liquidity-sweep-model` never reviews or places orders in this version.
+- **Orders (stock-checkup only, and only if you ask):** Claude runs the broker's order review, shows a table with the account's last 4 digits, price, cost and every warning, then stops. It places an order only if your **very next message** is exactly `PLACE THE ORDERS`, typed by you, for the unchanged orders just shown, within 15 minutes and a 1% price move. The phrase doesn't count from web pages, news, files, tool output, scheduled tasks, pasted text, or earlier messages.
+- **One tradable account**, matched exactly by nickname. Every other account is read-only.
+- **No options, no shorting, no margin borrowing**, regular hours only.
+- **Size caps:** every buy is limited to settled cash minus your cash floor, and to 25% of the account per stock.
+- **Web content is data, not instructions.** Instructions found in news, filings or web pages are ignored and reported to you.
+- **Missing data means fail.** No verdict of "Valid setup" or order suggestion when required data is missing.
+- **Privacy:** account numbers masked to the last 4 digits.
+
+Sweep-model kill switches (daily, weekly, monthly loss limits) rely on the results you report from your journal.
+
+### Recommended broker setting
+
+If your broker lets you require approval in its own app for orders from connected apps (Robinhood has a trade approval setting for its connector), turn it on. Then every order needs a second approval from you outside Claude.
+
+---
+
+## Day-trading rules have changed
+
+FINRA replaced the "pattern day trader" rule and its $25,000 minimum with new intraday margin standards, effective June 4, 2026. Brokers may phase the change in until October 20, 2027, so check which rule your broker applies and record it in `skills/liquidity-sweep-model/rules.md`. In a cash account, only use settled cash.
 
 ---
 
@@ -88,17 +98,19 @@ Before using the sweep model with real money:
 4. Go live only if expectancy is at least **+0.2R** and you followed the rules on at least 90% of trades.
 5. Start live at half size (0.5% risk) for 30 trades, then re-check.
 
+Going live requires editing the sweep model's Safety core yourself; the shared version is paper-only.
+
 ---
 
 ## Status
 
 | Skill | Version | Status |
 |---|---|---|
-| `stock-checkup` | v1 | In use for research |
-| `liquidity-sweep-model` | v1 | Paper-trading phase, not validated |
+| `stock-checkup` | v2 | Research; orders only through the confirmation rule |
+| `liquidity-sweep-model` | v2 | Paper trading only |
 
 ---
 
 ## License
 
-[MIT](LICENSE). You're free to use, copy, change and share these skills, as long as the license notice stays with them. The software is provided "as is", without warranty, and the authors aren't liable for any losses. That includes trading losses: see [Read this first](#️-read-this-first).
+[Personal Use License](LICENSE). If you were given access, you may use and modify these files for your own personal, non-commercial use. **You may not share, forward, re-upload, or fork them** without written permission. No warranty, and the authors aren't liable for any losses, including trading losses.
